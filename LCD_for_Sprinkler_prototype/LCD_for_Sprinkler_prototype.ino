@@ -46,10 +46,26 @@ byte VertBar[8] = {
   B00100,
   B00100
 };
-
+byte face[8] = {  0x01,
+  0x03,
+  0x02,
+  0x06,
+  0x16,
+  0x1C,
+  0x0C,
+  0x08};
 byte FifteenMin[8] = {0x0, 0xe, 0x15, 0x17, 0x11, 0xe, 0x0}; // fetching time indicator
 byte raindrop[8] = {0x4, 0x4, 0xA, 0xA, 0x11, 0xE, 0x0,}; // fetching Valve Data indicator
-
+typedef enum {
+  STAND_BY_ALL_OFF, RUN_SINGLE_ZONE, RUN_ALL_ZONES, CYCLE_COMPLETE, ZONE_SELECT_MENU, CANCELLING
+}  SprinklerStates;
+SprinklerStates state = STAND_BY_ALL_OFF;   //define variable called state, of the type SprinklerStates
+SprinklerStates lastState;                  //define variable called lastState, of the type SprinklerStates
+//typedef enum {
+//  RUN_ALL, RUN_Zone_1, RUN_Zone_2, RUN_Zone_3, Config
+//}  MainMenuStates;
+//MainMenuStates MainMenu_Current_State = RUN_ALL;
+byte MainMenu_Current_State = 0;       // 0 is Run all, 1= zone1, 2=zone2, 3= zone3, 4 = config
 // General Variables
 int Clock_Animation_time=200;
 unsigned long startMillis;
@@ -74,6 +90,7 @@ void setup()
   lcd.createChar(3, VertBar);       // Create custom character in LCD
   lcd.createChar(4, FifteenMin);    // Create custom character in LCD
   lcd.createChar(5, raindrop);      // Create custom character in LCD
+  lcd.createChar(6, face);
   lcd.backlight();                  // Turn on Back light (to tur off is lcd.noBacklight()
   attachInterrupt(digitalPinToInterrupt(DOWN_Pin), DownButtonPress, RISING);
   
@@ -88,17 +105,45 @@ void setup()
   lcd.print("Joao Borges");
   delay(2000);                // REPLACE WITH WAIT WHEN INTEGRATING WITH MYSENSORS
   lcd.init();
-  MainMenu();
+  // TURN RELAYS OFF
+  MainMenu(MainMenu_Current_State);
 }
 
 
 void loop()
 {
+  updateDisplay();            // Call update display function
+  switch (state) {
+    case STAND_BY_ALL_OFF:
+        if (DOWNbuttonPushed)
+        {
+           if (MainMenu_Current_State == 4)  MainMenu_Current_State = 0;
+              else MainMenu_Current_State++;
+           MainMenu(MainMenu_Current_State);
+         }
+        else if (0==0)
+          {
+          }
+   
+    break;
+    case RUN_SINGLE_ZONE:
+    break;
+    case RUN_ALL_ZONES:
+    break;
+    case CANCELLING:
+    break;
+  }
+
   
   if (DOWNbuttonPushed)
   {
     
   }
+    else if (0==0)
+    {
+    }
+   
 }
+
 
 

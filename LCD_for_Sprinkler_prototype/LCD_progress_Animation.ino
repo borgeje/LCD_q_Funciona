@@ -1,4 +1,4 @@
-void AnimeateProgressIcon(bool Run, int speedAni, int col, int line)
+void AnimeateProgressIcon(bool Run, int speedAnimation, int col, int line)
 {
    if (Run)
    {
