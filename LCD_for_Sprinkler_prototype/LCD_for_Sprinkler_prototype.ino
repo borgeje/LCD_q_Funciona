@@ -70,17 +70,25 @@ byte MainMenu_Current_State = 0;       // 0 is Run all, 1= zone1, 2=zone2, 3= zo
 int Clock_Animation_time=200;
 unsigned long startMillis;
 bool DOWNbuttonPushed = false;
+bool ENTERbuttonPushed = false;
 
 //Hardware
 const int DOWN_Pin = 3;
+const int ENTER_Pin = 4;
+const int MENU_Pin = 5;
+int RunValve = 0;
 
 //others
 #define VALVE_RESET_TIME 7500UL 
 
 
 /********************/
+/********************/
+/********************/
+/********************/
 void setup()
 {
+  Serial.begin(9600);
  //    Basic Initiatization procedures //
   lcd.init();                       // initialize the LCD
   lcd.init();                       // initialize the LCD
@@ -93,6 +101,7 @@ void setup()
   lcd.createChar(6, face);
   lcd.backlight();                  // Turn on Back light (to tur off is lcd.noBacklight()
   attachInterrupt(digitalPinToInterrupt(DOWN_Pin), DownButtonPress, RISING);
+  attachInterrupt(digitalPinToInterrupt(ENTER_Pin), ENTERbuttonPress, RISING);
   
   //////// MAIN INTRO SCREEN, print and stay 2s /////////
   lcd.setCursor(0,0);
@@ -103,15 +112,31 @@ void setup()
   lcd.print("              ");
   lcd.setCursor(2,3);
   lcd.print("Joao Borges");
-  delay(2000);                // REPLACE WITH WAIT WHEN INTEGRATING WITH MYSENSORS
+  delay(2000);                //////// REPLACE WITH WAIT WHEN INTEGRATING WITH MYSENSORS
   lcd.init();
   // TURN RELAYS OFF
   MainMenu(MainMenu_Current_State);
 }
 
 
+
+
+/********************/
+/********************/
+/********************/
 void loop()
 {
+  if (Serial.available()>0) 
+    {
+    String a;
+    a = Serial.read();
+    Serial.println(a);
+    if (a=="50")  ENTERbuttonPushed=true; 
+    else lcd.backlight(); //lcd.backlight;
+    DOWNbuttonPushed = true;
+
+    }
+  
   updateDisplay();            // Call update display function
   switch (state) {
     case STAND_BY_ALL_OFF:
@@ -120,16 +145,54 @@ void loop()
            if (MainMenu_Current_State == 4)  MainMenu_Current_State = 0;
               else MainMenu_Current_State++;
            MainMenu(MainMenu_Current_State);
+           DOWNbuttonPushed = false;
          }
-        else if (0==0)
+        else if (ENTERbuttonPushed)
           {
+            if (MainMenu_Current_State==0)
+              {
+                    state=RUN_ALL_ZONES;
+                    fastClear(); 
+              }
+              else if(MainMenu_Current_State==1)             
+                {
+                    state=RUN_SINGLE_ZONE;
+                    RunValve=1;
+                    fastClear(); 
+                }
+                else if(MainMenu_Current_State==2)
+                    {
+                      state=RUN_SINGLE_ZONE;
+                      RunValve=2;
+                      fastClear();
+                    }
+                  else if(MainMenu_Current_State==3)
+                      {
+                        state=RUN_SINGLE_ZONE;
+                        RunValve=3;
+                        fastClear();
+                      }
+                    else {}
+                
           }
-   
     break;
+    
     case RUN_SINGLE_ZONE:
+        lcd.setCursor(0,0);
+        lcd.print(" >>> Single Zone <<<");
+        lcd.setCursor(0,1);
+        lcd.print("               ");
+        lcd.setCursor(0,2);
+        lcd.print("Zone Selected: ");
+        lcd.print(RunValve);
+        lcd.setCursor(0,3);
+        lcd.print("Time Remaining:  ");
+        
     break;
+    
     case RUN_ALL_ZONES:
     break;
+    
     case CANCELLING:
     break;
   }

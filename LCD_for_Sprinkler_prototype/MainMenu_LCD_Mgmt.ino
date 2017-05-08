@@ -2,11 +2,11 @@ void MainMenu(byte Menu)
 {
 
   lcd.setCursor(0,0);
-  lcd.print("MAIN 09:00PM  22/05/16");
+  lcd.print(" *** Main Menu ***");
   lcd.setCursor(0,1);
   lcd.print(" 09:00PM  22/05/16");
   lcd.setCursor(0,2);
-  lcd.print("   Default          ");
+  lcd.print("Auto Cycle          ");
   lcd.setCursor(0,3);
   lcd.print("                   ");
   lcd.setCursor(0,3);
