@@ -4,6 +4,16 @@
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 
+#define DEBUG_ON   // comment out to supress serial monitor output
+#ifdef DEBUG_ON
+#define DEBUG_PRINT(x)   Serial.print(x)
+#define DEBUG_PRINTLN(x) Serial.println(x)
+#else
+#define DEBUG_PRINT(x)
+#define DEBUG_PRINTLN(x)
+#define SERIAL_START(x)
+#endif
+
 
 LiquidCrystal_I2C lcd(0x3F,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 byte Bar1[8] = {
@@ -143,11 +153,11 @@ void loop()
     {
     String a;
     a = Serial.read();
-    Serial.print(a);
-    Serial.print("   Current State = ");
-    Serial.print(state);
-    Serial.print("   MainMenu Current state = ");
-    Serial.println(MainMenu_Current_State);
+    DEBUG_PRINT(a);
+    DEBUG_PRINT("   Current State = ");
+    DEBUG_PRINT(state);
+    DEBUG_PRINT("   MainMenu Current state = ");
+    DEBUG_PRINTLN(MainMenu_Current_State);
     if (a=="50")  ENTERbuttonPushed=true; 
     else 
         {   lcd.backlight(); //lcd.backlight;
