@@ -178,6 +178,8 @@ void loop()
                     startMillis=millis();
                     ENTERbuttonPushed=false;
                     Run_All_Zones_Menu();
+                    RunValve=1;
+                    //Turn Relay 1 on
               }
               else if(MainMenu_Current_State==1)             
                 {
@@ -241,7 +243,92 @@ void loop()
       break;
     
     case RUN_ALL_ZONES:
-
+          nowMillis = millis();
+          if (RunValve==1)
+          {
+            if ((nowMillis-startMillis)>Zone1TimeAuto)
+            {
+              // TURN RELAY 1 off and TURN RELAY 2 ON
+              RunValve=2;
+              startMillis=millis();
+              lcd.setCursor (18,1);
+              lcd.print(" ");                                   //raindrop icon
+            }
+            else{
+                  timeRemaining = (Zone1TimeAuto-(nowMillis-startMillis));
+                  timeRemainingMinutes=timeRemaining/60000;
+                  timeRemainingSeconds=(timeRemaining/1000)-(timeRemainingMinutes*60);
+                  lcd.setCursor(12,1);
+                  if (timeRemainingMinutes<10) lcd.print("0");
+                  lcd.print(timeRemainingMinutes);
+                  lcd.print(":");
+                  if (timeRemainingSeconds<10) lcd.print("0");
+                  lcd.print(timeRemainingSeconds);
+                  //AnimeateProgressIcon(true, 100, 18, 1);
+                  lcd.setCursor (18,1);
+                  lcd.write(5);                                   //raindrop icon
+                  Serial.print("Time Remaining: ");
+                  Serial.print(timeRemaining);
+                  Serial.print("    Run Valve  ");
+                  Serial.println(RunValve);
+            }
+          }
+          MainMenu_Current_State=0;
+          if(RunValve==2) {
+            if ((nowMillis-startMillis)>Zone2TimeAuto)
+            {
+              // TURN RELAY 2 off and TURN RELAY 3 ON
+              RunValve=3;
+              startMillis=millis();
+              lcd.setCursor (18,2);
+              lcd.print(" ");                                   //raindrop icon
+            }
+               else{
+                  timeRemaining = (Zone2TimeAuto-(nowMillis-startMillis));
+                  timeRemainingMinutes=timeRemaining/60000;
+                  timeRemainingSeconds=(timeRemaining/1000)-(timeRemainingMinutes*60);
+                  lcd.setCursor(12,2);
+                  if (timeRemainingMinutes<10) lcd.print("0");
+                  lcd.print(timeRemainingMinutes);
+                  lcd.print(":");
+                  if (timeRemainingSeconds<10) lcd.print("0");
+                  lcd.print(timeRemainingSeconds);
+                  lcd.setCursor (18,2);
+                  lcd.write(5);                                   //raindrop icon
+                  Serial.print("Time Remaining: ");
+                  Serial.print(timeRemaining);
+                  Serial.print("    Run Valve  ");
+                  Serial.println(RunValve);
+                   }
+          } else if(RunValve==3) {
+                if ((nowMillis-startMillis)>Zone3TimeAuto)
+                {
+                  // TURN RELAY 2 off and TURN RELAY 3 ON
+                  RunValve=1;
+                  startMillis=millis();
+                  state=STAND_BY_ALL_OFF;
+                  MainMenu_Current_State=0;
+                  MainMenu(MainMenu_Current_State);
+                  
+                 }
+                 else{
+                  timeRemaining = (Zone3TimeAuto-(nowMillis-startMillis));
+                  timeRemainingMinutes=timeRemaining/60000;
+                  timeRemainingSeconds=(timeRemaining/1000)-(timeRemainingMinutes*60);
+                  lcd.setCursor(12,3);
+                  if (timeRemainingMinutes<10) lcd.print("0");
+                  lcd.print(timeRemainingMinutes);
+                  lcd.print(":");
+                  if (timeRemainingSeconds<10) lcd.print("0");
+                  lcd.print(timeRemainingSeconds);
+                  lcd.setCursor (18,3);
+                  lcd.write(5);                                   //raindrop icon
+                  Serial.print("Time Remaining: ");
+                  Serial.print(timeRemaining);
+                  Serial.print("    Run Valve  ");
+                  Serial.println(RunValve);
+            }
+          }
     break;
     
     case CANCELLING:
