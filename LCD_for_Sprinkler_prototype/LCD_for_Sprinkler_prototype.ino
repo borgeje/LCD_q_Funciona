@@ -158,8 +158,6 @@ void loop()
 
 
     
-  
-  updateDisplay();            // Call update display function
   switch (state) {
     case STAND_BY_ALL_OFF:
         if (DOWNbuttonPushed)
