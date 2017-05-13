@@ -66,11 +66,23 @@ SprinklerStates lastState;                  //define variable called lastState, 
 //}  MainMenuStates;
 //MainMenuStates MainMenu_Current_State = RUN_ALL;
 byte MainMenu_Current_State = 0;       // 0 is Run all, 1= zone1, 2=zone2, 3= zone3, 4 = config
+
+
 // General Variables
 int Clock_Animation_time=200;
 unsigned long startMillis;
+unsigned long timeRemaining;
+unsigned long timeRemainingMinutes;
+unsigned long timeRemainingSeconds;
 bool DOWNbuttonPushed = false;
 bool ENTERbuttonPushed = false;
+unsigned long nowMillis;
+
+//Flashmap
+unsigned long SINGLEVALVETIME=10000;   // 10 minutes * 60 *1000 time in milliseconds
+unsigned long Zone1TimeAuto = 11000;
+unsigned long Zone2TimeAuto = 9000;
+unsigned long Zone3TimeAuto = 5000;
 
 //Hardware
 const int DOWN_Pin = 3;
@@ -88,7 +100,7 @@ int RunValve = 0;
 /********************/
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
  //    Basic Initiatization procedures //
   lcd.init();                       // initialize the LCD
   lcd.init();                       // initialize the LCD
@@ -126,16 +138,26 @@ void setup()
 /********************/
 void loop()
 {
+  delay(100);
   if (Serial.available()>0) 
     {
     String a;
     a = Serial.read();
-    Serial.println(a);
+    Serial.print(a);
+    Serial.print("   Current State = ");
+    Serial.print(state);
+    Serial.print("   MainMenu Current state = ");
+    Serial.println(MainMenu_Current_State);
     if (a=="50")  ENTERbuttonPushed=true; 
-    else lcd.backlight(); //lcd.backlight;
-    DOWNbuttonPushed = true;
+    else 
+        {   lcd.backlight(); //lcd.backlight;
+            DOWNbuttonPushed = true;
+        }
 
     }
+
+
+    
   
   updateDisplay();            // Call update display function
   switch (state) {
@@ -153,49 +175,79 @@ void loop()
               {
                     state=RUN_ALL_ZONES;
                     fastClear(); 
+                    startMillis=millis();
+                    ENTERbuttonPushed=false;
+                    Run_All_Zones_Menu();
               }
               else if(MainMenu_Current_State==1)             
                 {
                     state=RUN_SINGLE_ZONE;
                     RunValve=1;
                     fastClear(); 
+                    SingleZoneScreenManagement(RunValve);
+                    timeRemaining=SINGLEVALVETIME;
+                    startMillis=millis();
+                    ENTERbuttonPushed=false;
                 }
                 else if(MainMenu_Current_State==2)
                     {
                       state=RUN_SINGLE_ZONE;
                       RunValve=2;
                       fastClear();
+                      SingleZoneScreenManagement(RunValve);
+                      timeRemaining=SINGLEVALVETIME;
+                      startMillis=millis();
+                      ENTERbuttonPushed=false;
                     }
                   else if(MainMenu_Current_State==3)
                       {
                         state=RUN_SINGLE_ZONE;
                         RunValve=3;
                         fastClear();
+                        SingleZoneScreenManagement(RunValve);
+                        timeRemaining=SINGLEVALVETIME;
+                        startMillis=millis();
+                        ENTERbuttonPushed=false;
                       }
                     else {}
                 
           }
-    break;
+      break;
     
     case RUN_SINGLE_ZONE:
-        lcd.setCursor(0,0);
-        lcd.print(" >>> Single Zone <<<");
-        lcd.setCursor(0,1);
-        lcd.print("               ");
-        lcd.setCursor(0,2);
-        lcd.print("Zone Selected: ");
-        lcd.print(RunValve);
-        lcd.setCursor(0,3);
-        lcd.print("Time Remaining:  ");
+          nowMillis = millis();
+          if ((nowMillis-startMillis)>SINGLEVALVETIME)
+            {
+              //Turn_Relay_Off
+              state=STAND_BY_ALL_OFF;
+              MainMenu_Current_State=0;
+              MainMenu(MainMenu_Current_State);
+              }
+              else {
+                  timeRemaining = (SINGLEVALVETIME-(nowMillis-startMillis));
+                  timeRemainingMinutes=timeRemaining/60000;
+                  timeRemainingSeconds=(timeRemaining/1000)-(timeRemainingMinutes*60);
+                  lcd.setCursor(14,3);
+                  lcd.print(timeRemainingMinutes);
+                  lcd.print(":");
+                  if (timeRemainingSeconds<10) lcd.print("0");
+                  lcd.print(timeRemainingSeconds);
+                  Serial.print("Time Remaining: ");
+                  Serial.print(timeRemaining);
+                  Serial.print("    Millis function:  ");
+                  Serial.println(nowMillis);
+              }
         
-    break;
+      break;
     
     case RUN_ALL_ZONES:
+
     break;
     
     case CANCELLING:
     break;
   }
+
 
   
   if (DOWNbuttonPushed)
